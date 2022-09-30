@@ -181,17 +181,16 @@ object Huffman {
    * the resulting list of characters.
    */
   def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
-    def decodeBits (subtree:CodeTree, bits: List[Bit], acc: List[Char]): List[Char] =
-      subtree match {
-        case Fork(left, right, _, _) => {
-          if (bits.head == 0) decodeBits(left, bits.tail, acc)
-          else decodeBits(right, bits.tail, acc)
-        }
-        case Leaf(char, _) => {
-          if (bits.isEmpty) acc ::: (char::Nil)
-          else decodeBits(tree, bits, acc ::: (char::Nil))
-        }
+    def decodeBits (subtree:CodeTree, bits: List[Bit], acc: List[Char]): List[Char] = subtree match {
+      case Fork(left, right, _, _) => {
+        if (bits.head == 0) decodeBits(left, bits.tail, acc)
+        else decodeBits(right, bits.tail, acc)
       }
+      case Leaf(char, _) => {
+        if (bits.isEmpty) acc ::: (char :: Nil)
+        else decodeBits(tree, bits, acc ::: (char :: Nil))
+      }
+    }
     decodeBits(tree,bits, Nil)
   }
 
