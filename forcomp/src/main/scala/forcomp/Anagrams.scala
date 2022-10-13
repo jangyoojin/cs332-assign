@@ -87,7 +87,7 @@ object Anagrams {
       count <- 1 to o._2
     } yield (o._1, count) :: temp))
   }
-
+// O[1] ... op (O[n-1] op (O[n] op acc))
   /** Subtracts occurrence list `y` from occurrence list `x`.
    * 
    *  The precondition is that the occurrence list `y` is a subset of
@@ -143,20 +143,21 @@ object Anagrams {
    *  Note: There is only one anagram of an empty sentence.
    */
   def sentenceAnagrams(sentence: Sentence): List[Sentence] = {
-    def makeWord(occurrences: Occurrences): List[Word] = {
-      if (occurrences.isEmpty) List[Word]()
-      else dictionaryByOccurrences getOrElse(occurrences, Nil)
-    }
+
     def wordToSentence(senOccurrences: Occurrences): List[Sentence] = {
-      combinations(senOccurrences).foldRight(List[Sentence]()) ((wordOcc:Occurrences, acc:List[Sentence]) =>
-        if (wordOcc.isEmpty) List[Word]()::acc
-        else acc ++ {
+      if (senOccurrences.isEmpty) List(Nil)
+      else combinations(senOccurrences).foldRight(List[Sentence]()) ((wordOcc:Occurrences, acc:List[Sentence]) =>
+        acc ++ {
           for {
-            word <- makeWord(wordOcc)
+            word <- dictionaryByOccurrences getOrElse (wordOcc, Nil)
             sentences <- wordToSentence(subtract(senOccurrences, wordOcc))
+            if wordOcc.nonEmpty
           } yield word :: sentences})
-        }
-    wordToSentence(sentenceOccurrences(sentence)).filter(sentenceOccurrences(_) == sentenceOccurrences(sentence))
-  }
+      }
+      wordToSentence(sentenceOccurrences(sentence))
+        //.filter(sentenceOccurrences(_) == sentenceOccurrences(sentence))
+    //1. senOccurrences가 [] 이런 빈 리스트인 경우 -> 빈 리스트가 포함된 리스트 리턴
+    //2. senOccurrences의 Combination(:[[(,)(,)],[(,)(,)]...] 중 빈 리스트 []가 있으면 -> 그 때는 acc의 element인 list들에 추가하지 말고 넘어가기(중복 방지)
+    }
 
 }
